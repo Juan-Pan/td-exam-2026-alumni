@@ -57,11 +57,8 @@ jobs:
       run: |
         gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
         
-        # 1. Aplicar todos los manifiestos de Kubernetes en la carpeta k8s/
         kubectl apply -f k8s/
         
-        # 2. Actualizar las imágenes de los despliegues a la versión recién construida ($GITHUB_SHA)
-        # Esto asegura que Kubernetes detecte el cambio y despliegue los nuevos pods
         kubectl set image deployment/deploy-api api-gw=$IMAGE_NAME_API:$GITHUB_SHA
         kubectl set image statefulset/sts-router router=$IMAGE_NAME_ROUTER:$GITHUB_SHA
         kubectl set image statefulset/sts-storage storage=$IMAGE_NAME_STORE:$GITHUB_SHA
