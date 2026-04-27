@@ -62,6 +62,6 @@ jobs:
         
         # 2. Actualizar las imágenes de los despliegues a la versión recién construida ($GITHUB_SHA)
         # Esto asegura que Kubernetes detecte el cambio y despliegue los nuevos pods
-        kubectl set image deployment/api-gw api-gw=$IMAGE_NAME_API:$GITHUB_SHA
-        kubectl set image statefulset/router router=$IMAGE_NAME_ROUTER:$GITHUB_SHA
-        kubectl set image statefulset/backend-storage backend-storage=$IMAGE_NAME_STORE:$GITHUB_SHA
+        kubectl set image deployment/deploy-api api-gw=$IMAGE_NAME_API:$GITHUB_SHA
+        kubectl set image statefulset/sts-router router=$IMAGE_NAME_ROUTER:$GITHUB_SHA
+        kubectl set image statefulset/sts-storage storage=$IMAGE_NAME_STORE:$GITHUB_SHA
