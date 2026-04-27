@@ -17,4 +17,4 @@ spec:
           image: <placeholder>
           ports:
             - containerPort: 3000
-            #prueba 
+            #prueba
