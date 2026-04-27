@@ -6,22 +6,25 @@ on:
       - main
 
 env:
-  PROJECT_ID: ${{ <placeholder> }}
-  GKE_CLUSTER: ${{ <placeholder> }}
-  GKE_ZONE: ${{ <placeholder> }}
-  IMAGE_NAME_ROUTER: gcr.io/${{ <placeholder> }}/router
-  IMAGE_NAME_API: gcr.io/${{ <placeholder> }}/api-gw
-  IMAGE_NAME_STORE: gcr.io/${{ <placeholder> }}/backend-storage
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  GKE_CLUSTER: ${{ vars.GKE_CLUSTER }}
+  GKE_ZONE: ${{ vars.GKE_ZONE }}
+  IMAGE_NAME_ROUTER: gcr.io/${{ vars.GCP_PROJECT_ID }}/router
+  IMAGE_NAME_API: gcr.io/${{ vars.GCP_PROJECT_ID }}/api-gw
+  IMAGE_NAME_STORE: gcr.io/${{ vars.GCP_PROJECT_ID }}/backend-storage
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
+
     - uses: "google-github-actions/setup-gcloud@v2"
       with:
         install_components: "gke-gcloud-auth-plugin"
@@ -53,4 +56,12 @@ jobs:
     - name: Deploy to GKE
       run: |
         gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
-        <placeholder - add all necessary lines>
+        
+        # 1. Aplicar todos los manifiestos de Kubernetes en la carpeta k8s/
+        kubectl apply -f k8s/
+        
+        # 2. Actualizar las imágenes de los despliegues a la versión recién construida ($GITHUB_SHA)
+        # Esto asegura que Kubernetes detecte el cambio y despliegue los nuevos pods
+        kubectl set image deployment/api-gw api-gw=$IMAGE_NAME_API:$GITHUB_SHA
+        kubectl set image statefulset/router router=$IMAGE_NAME_ROUTER:$GITHUB_SHA
+        kubectl set image statefulset/backend-storage backend-storage=$IMAGE_NAME_STORE:$GITHUB_SHA
